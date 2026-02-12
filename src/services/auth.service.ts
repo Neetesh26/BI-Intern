@@ -4,10 +4,10 @@ import { errorIndex } from "../errors/errorIndex";
 import { generateOTP, generateToken } from "../shared/helper";
 import twilioService from "./twillio.service";
 import { getEnv } from "../shared/utils";
-import { createUser, findUserByPhone } from "../repository/users.repository";
+import { createUser, findByCondition } from "../repository/users.repository";
 
 export const registerUser = async (phone: string) => {
-    const existingUser = await findUserByPhone(phone);
+    const existingUser = await findByCondition({phone});
 
     const otp = generateOTP();
     const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 min
@@ -21,40 +21,39 @@ export const registerUser = async (phone: string) => {
             HttpStatus.BAD_REQUEST
         );
     }
-
-    if (existingUser) {
-
-        if (existingUser.isverified) {
-            throw new errorIndex.ConflictException(
-                HttpMessage.CONFLICT,
-                HttpStatus.CONFLICT
-            );
-        }
-
-        existingUser.otp = otp;
-        existingUser.otpExpiry = otpExpiry;
-        existingUser.token = token;
-
-        await existingUser.save();
-        return existingUser;
+    if(!existingUser){
+        const newUser = await createUser({
+          phone,
+          otp,
+          otpExpiry,
+          token,
+          isverified: false,
+      });
+      return newUser
     }
+    
+    if (existingUser.isverified) {
+        throw new errorIndex.ConflictException(
+            HttpMessage.CONFLICT,
+            HttpStatus.CONFLICT
+        );
+    }
+    
+    
+    existingUser.otp = otp;
+    existingUser.otpExpiry = otpExpiry;
+    existingUser.token = token;
 
-    const newUser = await createUser({
-        phone,
-        otp,
-        otpExpiry,
-        token,
-        isverified: false,
-    });
+    await existingUser.save();
+    return existingUser;
 
-    return newUser;
 };
 
 
 export const verifyUserOTP = async (phone: string, enteredOTP: string) => {
     // console.log("phone---->",phone);
     
-    const user = await findUserByPhone(phone)
+    const user = await findByCondition({phone})
 
     if (!user) {
         throw new errorIndex.NotFoundHandler(HttpMessage.NOT_FOUND, HttpStatus.NOT_FOUND);
@@ -74,4 +73,36 @@ export const verifyUserOTP = async (phone: string, enteredOTP: string) => {
 
     await user.save();
     return user;
+};
+
+
+export const loginUser = async (data: string) => {
+        console.log("data is ", data);
+
+    const user = await findByCondition({phone:data});
+    console.log("user is ", user);
+    
+    if (!user) {
+        throw new errorIndex.NotFoundHandler(
+            HttpMessage.NOT_FOUND,
+            HttpStatus.NOT_FOUND
+        );
+    }
+
+    if (!user.isverified) {
+        throw new errorIndex.BadRequestException(
+            "User not verified",
+            HttpStatus.BAD_REQUEST
+        );
+    }
+
+    const token = generateToken(
+        { phone: user.phone, id: user._id },
+        getEnv("JWT_SECRET")
+    );
+
+    user.token = token;
+    await user.save();
+
+    return { user, token };
 };

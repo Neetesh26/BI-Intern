@@ -1,6 +1,6 @@
 import asyncWrapper from "../middleware/asyncWrapper";
 import { Request, Response } from "express";
-import { registerUser, verifyUserOTP } from "../services/auth.service";
+import { loginUser, registerUser, verifyUserOTP } from "../services/auth.service";
 import { HttpMessage, HttpStatus } from "../constants";
 
 export const signupUser = asyncWrapper(async (req: Request, res: Response) => {
@@ -15,21 +15,36 @@ export const signupUser = asyncWrapper(async (req: Request, res: Response) => {
 });
 
 export const verifyUserOTPController = asyncWrapper(
-  async (req: Request<{ phone: string }>, res: Response) => {
+  async (_req: Request, _res: Response) => {
     console.log("bkjbkjkjb");
     
-    console.log(req.params);
+    console.log(_req.params);
     
-    const { phone } = req.params;
+    const { phone } = _req.params;
     console.log(phone);
     
-    const { otp } = req.body as { otp: string };
+    const { otp } = _req.body as { otp: string };
 
     const user = await verifyUserOTP(phone, otp);
 
-    return res.status(HttpStatus.OK).json({
+    return _res.status(HttpStatus.OK).json({
       message: "OTP verified successfully",
       data: user,
+    });
+  }
+);
+
+export const loginUserController = asyncWrapper(
+  async (req: Request, res: Response) => {
+
+    const { phone } = req.body;
+    console.log("phone number",phone);
+    
+    const data = await loginUser(phone);
+
+    return res.status(HttpStatus.OK).json({
+      message: "Login successful",
+      data
     });
   }
 );

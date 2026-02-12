@@ -4,27 +4,30 @@ export const createUser = async (data: any) => {
   return await usersSchema.create(data);
 };
 
-export const findUserByPhone = async (phone: string) => {
-  return await usersSchema.findOne({ phone });
+export const findByCondition = async (obj: Record<string, string | number>) => {
+
+  return await usersSchema.findOne(obj);
 };
 
-export const findUserById = async (id: string) => {
-  return await usersSchema.findById(id);
+export const findMany = async (obj: Record<string, string | number>) => {
+  return await usersSchema.find(obj);
 };
 
-export const getAllUsers = async () => {
-  return await usersSchema.find();
-};
-
-export const updateUserByPhone = async (phone: string, data: any) => {
+export const updateOne = async (
+  condition: Record<string, string | number>,
+  data: Record<string, string | number>
+) => {
   return await usersSchema.findOneAndUpdate(
-    { phone },
+    condition,
     data,
-    { new: true } 
+    { new: true }
   );
 };
 
-export const updateUserById = async (id: string, data: any) => {
+export const updateById = async (
+  id: string,
+  data: Record<string, string | number>
+) => {
   return await usersSchema.findByIdAndUpdate(
     id,
     data,
@@ -32,10 +35,12 @@ export const updateUserById = async (id: string, data: any) => {
   );
 };
 
-export const deleteUserByPhone = async (phone: string) => {
-  return await usersSchema.findOneAndDelete({ phone });
+export const deleteOne = async (
+  condition: Record<string, string | number>
+) => {
+  return await usersSchema.findOneAndDelete(condition);
 };
 
-export const deleteUserById = async (id: string) => {
-  return await usersSchema.findByIdAndDelete(id);
+export const deleteUserById = async (ids: string | number) => {
+  return await usersSchema.findByIdAndDelete(ids);
 };
