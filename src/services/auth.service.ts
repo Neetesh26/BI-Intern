@@ -22,10 +22,8 @@ export const registerUser = async (phone: string) => {
         );
     }
 
-    // ✅ If user already exists
     if (existingUser) {
 
-        // ❌ Already verified
         if (existingUser.isverified) {
             throw new errorIndex.ConflictException(
                 HttpMessage.CONFLICT,
@@ -33,7 +31,6 @@ export const registerUser = async (phone: string) => {
             );
         }
 
-        // ♻️ Update OTP instead of creating new user
         existingUser.otp = otp;
         existingUser.otpExpiry = otpExpiry;
         existingUser.token = token;
@@ -42,7 +39,6 @@ export const registerUser = async (phone: string) => {
         return existingUser;
     }
 
-    // ✅ Create new user (only if not exists)
     const newUser = await createUser({
         phone,
         otp,
@@ -56,7 +52,7 @@ export const registerUser = async (phone: string) => {
 
 
 export const verifyUserOTP = async (phone: string, enteredOTP: string) => {
-    console.log("phone---->",phone);
+    // console.log("phone---->",phone);
     
     const user = await findUserByPhone(phone)
 
