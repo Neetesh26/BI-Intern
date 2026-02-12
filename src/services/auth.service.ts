@@ -1,108 +1,144 @@
 import { HttpMessage, HttpStatus } from "../constants";
-// import usersSchema from "../models/usersSchema";
 import { errorIndex } from "../errors/errorIndex";
 import { generateOTP, generateToken } from "../shared/helper";
 import twilioService from "./twillio.service";
 import { getEnv } from "../shared/utils";
 import { createUser, findByCondition } from "../repository/users.repository";
+import logger from "../config/logger";
+
 
 export const registerUser = async (phone: string) => {
-    const existingUser = await findByCondition({phone});
+  logger.info(`Register attempt for phone: ${phone}`);
 
-    const otp = generateOTP();
-    const otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 min
-    const token = generateToken({ phone }, getEnv("JWT_SECRET"));
+  const existingUser = await findByCondition({ phone });
 
-    const successfullySendOtp = await twilioService.sendOTP(phone, otp);
+  const otp = generateOTP();
+  const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
+  const token = generateToken({ phone }, getEnv("JWT_SECRET"));
 
-    if (!successfullySendOtp) {
-        throw new errorIndex.BadRequestException(
-            HttpMessage.BAD_REQUEST,
-            HttpStatus.BAD_REQUEST
-        );
-    }
-    if(!existingUser){
-        const newUser = await createUser({
-          phone,
-          otp,
-          otpExpiry,
-          token,
-          isverified: false,
-      });
-      return newUser
-    }
-    
-    if (existingUser.isverified) {
-        throw new errorIndex.ConflictException(
-            HttpMessage.CONFLICT,
-            HttpStatus.CONFLICT
-        );
-    }
-    
-    
-    existingUser.otp = otp;
-    existingUser.otpExpiry = otpExpiry;
-    existingUser.token = token;
+  const successfullySendOtp = await twilioService.sendOTP(phone, otp);
 
-    await existingUser.save();
-    return existingUser;
+  if (!successfullySendOtp) {
+    logger.error(`Failed to send OTP to phone: ${phone}`);
+    throw new errorIndex.BadRequestException(
+      HttpMessage.BAD_REQUEST,
+      HttpStatus.BAD_REQUEST
+    );
+  }
 
+  if (!existingUser) {
+    logger.info(`Creating new user with phone: ${phone}`);
+
+    const newUser = await createUser({
+      phone,
+      otp,
+      otpExpiry,
+      token,
+      isverified: false,
+    });
+
+    return newUser;
+  }
+
+  if (existingUser.isverified) {
+    logger.warn(`User already verified: ${phone}`);
+
+    throw new errorIndex.ConflictException(
+      HttpMessage.CONFLICT,
+      HttpStatus.CONFLICT
+    );
+  }
+
+  logger.info(`Updating OTP for existing unverified user: ${phone}`);
+
+  existingUser.otp = otp;
+  existingUser.otpExpiry = otpExpiry;
+  existingUser.token = token;
+
+  await existingUser.save();
+
+  return existingUser;
 };
+
 
 
 export const verifyUserOTP = async (phone: string, enteredOTP: string) => {
-    // console.log("phone---->",phone);
-    
-    const user = await findByCondition({phone})
+  logger.info(`OTP verification attempt for phone: ${phone}`);
 
-    if (!user) {
-        throw new errorIndex.NotFoundHandler(HttpMessage.NOT_FOUND, HttpStatus.NOT_FOUND);
-    }
+  const user = await findByCondition({ phone });
 
-    if (user.otp !== enteredOTP) {
-        throw new errorIndex.BadRequestException(HttpMessage.BAD_REQUEST, HttpStatus.BAD_REQUEST);
-    }
+  if (!user) {
+    logger.warn(`OTP verification failed - user not found: ${phone}`);
 
-    if (!user.otpExpiry || user.otpExpiry < new Date()) {
-        throw new errorIndex.BadRequestException(HttpMessage.BAD_REQUEST, HttpStatus.BAD_REQUEST);
-    }
+    throw new errorIndex.NotFoundHandler(
+      HttpMessage.NOT_FOUND,
+      HttpStatus.NOT_FOUND
+    );
+  }
 
-    user.isverified = true;
-    user.otp = undefined;
-    user.otpExpiry = undefined;
+  if (user.otp !== enteredOTP) {
+    logger.warn(`Invalid OTP entered for phone: ${phone}`);
 
-    await user.save();
-    return user;
+    throw new errorIndex.BadRequestException(
+      HttpMessage.BAD_REQUEST,
+      HttpStatus.BAD_REQUEST
+    );
+  }
+
+  if (!user.otpExpiry || user.otpExpiry < new Date()) {
+    logger.warn(`OTP expired for phone: ${phone}`);
+
+    throw new errorIndex.BadRequestException(
+      HttpMessage.BAD_REQUEST,
+      HttpStatus.BAD_REQUEST
+    );
+  }
+
+  user.isverified = true;
+  user.otp = undefined;
+  user.otpExpiry = undefined;
+
+  await user.save();
+
+  logger.info(`User successfully verified: ${phone}`);
+
+  return user;
 };
 
 
-export const loginUser = async (data: string) => {
-        console.log("data is ", data);
 
-    const user = await findByCondition({phone:data});
-    console.log("user is ", user);
-    
-    if (!user) {
-        throw new errorIndex.NotFoundHandler(
-            HttpMessage.NOT_FOUND,
-            HttpStatus.NOT_FOUND
-        );
-    }
+export const loginUser = async (phone: string) => {
+  logger.info(`Login attempt for phone: ${phone}`);
 
-    if (!user.isverified) {
-        throw new errorIndex.BadRequestException(
-            "User not verified",
-            HttpStatus.BAD_REQUEST
-        );
-    }
+  const user = await findByCondition({ phone });
 
-    const token = generateToken(
-        { phone: user.phone, id: user._id },
-        getEnv("JWT_SECRET")
+  if (!user) {
+    logger.warn(`Login failed - user not found: ${phone}`);
+
+    throw new errorIndex.NotFoundHandler(
+      HttpMessage.NOT_FOUND,
+      HttpStatus.NOT_FOUND
     );
+  }
 
-    user.token = token;
-    await user.save();
+  if (!user.isverified) {
+    logger.warn(`Login blocked - user not verified: ${phone}`);
 
-    return { user, token };
+    throw new errorIndex.BadRequestException(
+      "User not verified",
+      HttpStatus.BAD_REQUEST
+    );
+  }
+
+  const token = generateToken(
+    { phone: user.phone, id: user._id },
+    getEnv("JWT_SECRET")
+  );
+
+  user.token = token;
+  await user.save();
+
+  logger.info(`User logged in successfully: ${phone}`);
+
+  return { user, token };
 };

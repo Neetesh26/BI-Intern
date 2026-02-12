@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-
 const startServer = async (): Promise<void> => {
   try {
     await connectDB();

@@ -38,7 +38,7 @@ export const loginUserController = asyncWrapper(
   async (req: Request, res: Response) => {
 
     const { phone } = req.body;
-    console.log("phone number",phone);
+    // console.log("phone number",phone);
     
     const data = await loginUser(phone);
 
