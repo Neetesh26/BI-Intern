@@ -11,7 +11,10 @@ export const findByConditionProduct = async (obj: Record<string, string | number
   return await ProductModel.findOne(obj);
 };
 
-// export const find
+export const findBYIdCondition = async (obj: string | number) => {
+
+  return await ProductModel.findById({obj});
+};
 
 export const findMany = async (obj: Record<string, string | number>) => {
   return await ProductModel.find(obj);

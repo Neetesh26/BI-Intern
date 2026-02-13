@@ -3,9 +3,8 @@ import NotFoundHandler from "../errors/NotFoundHandler";
 import { findByCondition } from "../repository/users.repository";
 import { generateOTP } from "../shared/helper";
 import twillioService from "./twillio.service";
-import { createProductDataInDB } from "../repository/product.repository";
+import { createProductDataInDB, findBYIdCondition } from "../repository/product.repository";
 import { uploadToImageKit } from "./storage.service";
-import { ProductModel } from "../models/productSchema";
 
 export const adminLoginServices = async (phone: string) => {
   const user = await findByCondition({ phone: phone })
@@ -46,7 +45,7 @@ export const updateProductService = async (
   files?: Express.Multer.File[]
 ) => {
 
-  const product = await ProductModel.findById(productId);
+  const product = await findBYIdCondition(productId)
 
   if (!product) {
     throw new NotFoundHandler(
@@ -69,30 +68,21 @@ export const updateProductService = async (
 
   if (body.colors !== undefined)
     product.colors = body.colors;
-// if (!product.price) {
-//   product.price = { currency: "", amount: 0 };
-// }
-//   if (body.currency !== undefined)
-//     product.price.currency = body.currency;
 
-//   if (body.amount !== undefined)
-//     product.price.amount = Number(body.amount);
-
-  // Ensure price object exists ONLY if updating price
 if ((body.currency !== undefined || body.amount !== undefined) && !product.price) {
   product.price = {
     currency: body.currency,
-    amount: 0
+    amount: Number(body.amount)
   };
 }
 
-if (body.currency !== undefined) {
-  product.price!.currency = body.currency;
-}
+// if (body.currency !== undefined) {
+//   product.price!.currency = body.currency;
+// }
 
-if (body.amount !== undefined) {
-  product.price!.amount = Number(body.amount);
-}
+// if (body.amount !== undefined) {
+//   product.price!.amount = Number(body.amount);
+// }
 
 
   if (files && files.length > 0) {
