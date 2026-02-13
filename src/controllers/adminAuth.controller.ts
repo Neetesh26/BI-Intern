@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncWrapper from "../middleware/asyncWrapper";
-import { adminLoginServices, createProducts } from "../services/adminAuth.service";
+import { adminLoginServices, createProducts, updateProductService } from "../services/adminAuth.service";
 import NotFoundHandler from "../errors/NotFoundHandler";
 import { HttpMessage, HttpStatus } from "../constants";
 import { uploadToImageKit } from "../services/storage.service";
@@ -54,6 +54,26 @@ export const addProductController = asyncWrapper(
     return res.status(HttpStatus.CREATED).json({
       message: HttpMessage.CREATED,
       data: product,
+    });
+  }
+);
+
+
+export const updateProductController = asyncWrapper(
+  async (req: Request, res: Response) => {
+
+    const { productId } = req.params;
+    console.log("product id",productId);
+    
+    const updatedProduct = await updateProductService(
+      productId,
+      req.body,
+      req.files as Express.Multer.File[]
+    );
+
+    return res.status(HttpStatus.OK).json({
+      message: HttpMessage.OK,
+      data: updatedProduct,
     });
   }
 );

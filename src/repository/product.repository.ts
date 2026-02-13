@@ -6,11 +6,12 @@ export const createProductDataInDB = async (data: any) => {
   return await ProductModel.create(data);
 };
 
-export const findByCondition = async (obj: Record<string, string | number>) => {
+export const findByConditionProduct = async (obj: Record<string, string | number>) => {
 
   return await ProductModel.findOne(obj);
 };
 
+// export const find
 
 export const findMany = async (obj: Record<string, string | number>) => {
   return await ProductModel.find(obj);

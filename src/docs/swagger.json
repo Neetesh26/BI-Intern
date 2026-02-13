@@ -10,22 +10,57 @@
       "url": "http://localhost:5000/api/v1"
     }
   ],
- "tags": [
+  "tags": [
     {
       "name": "Health",
-      "description": ""
+      "description": "Health check API"
     },
     {
       "name": "Auth",
-      "description": "API for auth"
+      "description": "User authentication APIs"
     },
     {
-      "name": "Role",
-      "description": "API for user role"
+      "name": "Admin",
+      "description": "Admin product management APIs"
     }
   ],
   "paths": {
-    "/signup": {
+
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Check API health status",
+        "responses": {
+          "200": {
+            "description": "Server is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "OK"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2026-02-12T10:00:00Z"
+                    },
+                    "uptime": {
+                      "type": "number",
+                      "example": 10234
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "/auth/signup": {
       "post": {
         "tags": ["Auth"],
         "summary": "Register user and send OTP",
@@ -38,7 +73,7 @@
                 "properties": {
                   "phone": {
                     "type": "string",
-                    "example": "xxxxxxxxxx"
+                    "example": "8989071137"
                   }
                 }
               }
@@ -46,16 +81,13 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "OTP sent successfully"
-          },
-          "400": {
-            "description": "Bad request"
-          }
+          "201": { "description": "OTP sent successfully" },
+          "400": { "description": "Bad request" }
         }
       }
     },
-    "/verify/{phone}": {
+
+    "/auth/verify/{phone}": {
       "post": {
         "tags": ["Auth"],
         "summary": "Verify OTP",
@@ -86,16 +118,13 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "OTP verified successfully"
-          },
-          "400": {
-            "description": "Invalid OTP"
-          }
+          "200": { "description": "OTP verified successfully" },
+          "400": { "description": "Invalid OTP" }
         }
       }
     },
-    "/login": {
+
+    "/auth/login": {
       "post": {
         "tags": ["Auth"],
         "summary": "Login user",
@@ -116,49 +145,159 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Login successful"
-          },
-          "404": {
-            "description": "User not found"
-          }
+          "200": { "description": "Login successful" },
+          "404": { "description": "User not found" }
         }
       }
     },
-    "/health": {
-  "get": {
-    "tags": ["Health"],
-    "summary": "Check API health status",
-    "description": "Returns server health status, uptime and timestamp",
-    "responses": {
-      "200": {
-        "description": "Server is healthy",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "string",
-                  "example": "OK"
-                },
-                "timestamp": {
-                  "type": "string",
-                  "format": "date-time",
-                  "example": "2026-02-12T10:00:00Z"
-                },
-                "uptime": {
-                  "type": "number",
-                  "example": 10234
+
+    "/admin/login": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Admin login with phone",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "phone": {
+                    "type": "string",
+                    "example": "8989071137"
+                  }
                 }
               }
             }
           }
+        },
+        "responses": {
+          "200": { "description": "OTP sent successfully" },
+          "404": { "description": "Admin not found" }
+        }
+      }
+    },
+
+    "/admin/create-Product": {
+      "post": {
+        "tags": ["Admin"],
+        "summary": "Create new product",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productName": {
+                    "type": "string",
+                    "example": "Men T-Shirt"
+                  },
+                  "description": {
+                    "type": "string",
+                    "example": "Premium cotton T-shirt"
+                  },
+                  "currency": {
+                    "type": "string",
+                    "enum": ["INR", "USD"],
+                    "example": "INR"
+                  },
+                  "amount": {
+                    "type": "number",
+                    "example": 799
+                  },
+                  "category": {
+                    "type": "string",
+                    "enum": ["MENS", "WOMENS", "KIDS"],
+                    "example": "MENS"
+                  },
+                  "sizes": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "example": ["M", "L"]
+                  },
+                  "colors": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "example": ["Black", "White"]
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Product created successfully" },
+          "400": { "description": "Validation error" }
+        }
+      }
+    },
+
+    "/admin/product-update/{productId}": {
+      "put": {
+        "tags": ["Admin"],
+        "summary": "Update product",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "productId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "productName": { "type": "string" },
+                  "description": { "type": "string" },
+                  "currency": {
+                    "type": "string",
+                    "enum": ["INR", "USD"]
+                  },
+                  "amount": { "type": "number" },
+                  "category": {
+                    "type": "string",
+                    "enum": ["MENS", "WOMENS", "KIDS"]
+                  },
+                  "sizes": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "colors": {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  },
+                  "images": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Product updated successfully" },
+          "404": { "description": "Product not found" }
         }
       }
     }
-  }
-}
 
   }
 }

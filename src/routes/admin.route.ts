@@ -1,5 +1,5 @@
 import express from "express"
-import { addProductController, adminLogin } from "../controllers/adminAuth.controller"
+import { addProductController, adminLogin, updateProductController,  } from "../controllers/adminAuth.controller"
 import { upload } from "../services/multer.service"
 
 
@@ -11,6 +11,7 @@ const router = express.Router()
 
 router.post('/login',adminLogin)
 router.post('/create-Product',upload.array("images"),addProductController)
+router.put('/product-update/:productId', updateProductController)
 
 
 
