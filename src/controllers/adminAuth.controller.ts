@@ -3,52 +3,56 @@ import asyncWrapper from "../middleware/asyncWrapper";
 import { adminLoginServices, createProducts } from "../services/adminAuth.service";
 import NotFoundHandler from "../errors/NotFoundHandler";
 import { HttpMessage, HttpStatus } from "../constants";
-
-export const adminLogin = asyncWrapper(async (req: Request, res: Response) => {
-     const { phone } = req.body;
-      const user = adminLoginServices(phone)
-      if(!user){
-        throw new NotFoundHandler(HttpMessage.NOT_FOUND,HttpStatus.NOT_FOUND)
-      }
-    return res.status(HttpStatus.OK).json({
-      message: "OTP send Successfully",
-      user:user
-    });
-  
-})
+import { uploadToImageKit } from "../services/storage.service";
 
 
-export const addProductController = asyncWrapper(async (req: Request, res: Response) => {
-    const {
-      productName,
-      description,
-      price,
-      category,
-      sizes,
-      colors,
-      images,
-      user_id,
-    } = req.body;
+export const adminLogin = asyncWrapper(
+  async (req: Request, res: Response) => {
+  const { phone } = req.body;
+  const user = await adminLoginServices(phone)
+  if (!user) {
+    throw new NotFoundHandler(HttpMessage.NOT_FOUND, HttpStatus.NOT_FOUND)
+  }
+  return res.status(HttpStatus.OK).json({
+    message: HttpMessage.OK,
+    user: user
+  });
+}
+)
 
-    if (!productName || !description || !price?.amount || !colors || !images || !user_id) {
-      return res.status(HttpStatus.BAD_REQUEST).json({
-        message: "Required fields are missing",
-      });
-    }
+export const addProductController = asyncWrapper(
+  async (req: Request, res: Response) => {
+    const files = req.files as Express.Multer.File[];
+
+    const uploadedImages = await Promise.all(
+      files.map((file) =>
+        uploadToImageKit(file.buffer, file.originalname)
+      )
+    );
 
     const product = await createProducts({
-      productName,
-      description,
-      price,
-      category,
-      sizes,
-      colors,
-      images,
-      user_id,
+      productName: req.body.productName,
+      description: req.body.description,
+      category: req.body.category,
+
+      price: {
+        currency: req.body.currency || "INR",
+        amount: Number(req.body.amount),
+      },
+
+      sizes: Array.isArray(req.body.sizes)
+        ? req.body.sizes
+        : [req.body.sizes],
+
+      colors: Array.isArray(req.body.colors)
+        ? req.body.colors
+        : [req.body.colors],
+
+      images: uploadedImages.map((img: any) => img.url),
     });
 
     return res.status(HttpStatus.CREATED).json({
-      message: "Product created successfully",
+      message: HttpMessage.CREATED,
       data: product,
     });
   }

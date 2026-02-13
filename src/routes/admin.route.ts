@@ -1,5 +1,6 @@
 import express from "express"
 import { addProductController, adminLogin } from "../controllers/adminAuth.controller"
+import { upload } from "../services/multer.service"
 
 
 const router = express.Router()
@@ -9,7 +10,7 @@ const router = express.Router()
 // })
 
 router.post('/login',adminLogin)
-router.post('/create',addProductController)
+router.post('/create-Product',upload.array("images"),addProductController)
 
 
 

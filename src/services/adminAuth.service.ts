@@ -6,8 +6,6 @@ import twillioService from "./twillio.service";
 import { createProductDataInDB } from "../repository/product.repository";
 
 export const adminLoginServices = async (phone: string) => {
-
-
   const user = await findByCondition({ phone :phone})
 
   if (!user || user.role !== "admin") {
@@ -21,14 +19,11 @@ export const adminLoginServices = async (phone: string) => {
   user.otpExpiry = new Date(Date.now() + 5 * 60 * 1000); // 5 min
 
   const successfullySendOtp = await twillioService.sendOTP(phone, otp);
-
   if (!successfullySendOtp) {
     throw new NotFoundHandler(HttpMessage.NOT_FOUND, HttpStatus.NOT_FOUND)
   }
 
   await user.save();
-
-
   return user;
 }
 
