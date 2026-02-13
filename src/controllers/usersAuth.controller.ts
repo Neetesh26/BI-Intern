@@ -16,7 +16,6 @@ export const signupUser = asyncWrapper(async (req: Request, res: Response) => {
 
 export const verifyUserOTPController = asyncWrapper(
   async (_req: Request, _res: Response) => {
-    console.log("bkjbkjkjb");
     
     console.log(_req.params);
     

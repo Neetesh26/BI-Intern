@@ -6,14 +6,22 @@
     "description": "API documentation for E-Commerce Backend"
   },
   "servers": [
-      {
-        "url": "http://localhost:5000/api/v1/auth"
-      }
+    {
+      "url": "http://localhost:5000/api/v1"
+    }
   ],
-  "tags": [
+ "tags": [
+    {
+      "name": "Health",
+      "description": ""
+    },
     {
       "name": "Auth",
-      "description": "Authentication APIs"
+      "description": "API for auth"
+    },
+    {
+      "name": "Role",
+      "description": "API for user role"
     }
   ],
   "paths": {
@@ -116,6 +124,41 @@
           }
         }
       }
+    },
+    "/health": {
+  "get": {
+    "tags": ["Health"],
+    "summary": "Check API health status",
+    "description": "Returns server health status, uptime and timestamp",
+    "responses": {
+      "200": {
+        "description": "Server is healthy",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "2026-02-12T10:00:00Z"
+                },
+                "uptime": {
+                  "type": "number",
+                  "example": 10234
+                }
+              }
+            }
+          }
+        }
+      }
     }
+  }
+}
+
   }
 }
