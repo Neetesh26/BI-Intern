@@ -69,20 +69,20 @@ export const updateProductService = async (
   if (body.colors !== undefined)
     product.colors = body.colors;
 
-if ((body.currency !== undefined || body.amount !== undefined) && !product.price) {
-  product.price = {
-    currency: body.currency,
-    amount: Number(body.amount)
-  };
-}
+  if ((body.currency !== undefined || body.amount !== undefined) && !product.price) {
+    product.price = {
+      currency: body.currency,
+      amount: Number(body.amount)
+    };
+  }
 
-// if (body.currency !== undefined) {
-//   product.price!.currency = body.currency;
-// }
+  // if (body.currency !== undefined) {
+  //   product.price!.currency = body.currency;
+  // }
 
-// if (body.amount !== undefined) {
-//   product.price!.amount = Number(body.amount);
-// }
+  // if (body.amount !== undefined) {
+  //   product.price!.amount = Number(body.amount);
+  // }
 
 
   if (files && files.length > 0) {
