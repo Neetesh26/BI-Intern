@@ -29,7 +29,8 @@ export const addProductController = asyncWrapper(
         uploadToImageKit(file.buffer, file.originalname)
       )
     );
-
+    console.log(" req body product--->",req.body);
+    
     const product = await createProducts({
       productName: req.body.productName,
       description: req.body.description,
@@ -44,9 +45,7 @@ export const addProductController = asyncWrapper(
         ? req.body.sizes
         : [req.body.sizes],
 
-      colors: Array.isArray(req.body.colors)
-        ? req.body.colors
-        : [req.body.colors],
+      colors: req.body.colors,
 
       images: uploadedImages.map((img: any) => img.url),
     });
@@ -63,7 +62,7 @@ export const updateProductController = asyncWrapper(
   async (req: Request, res: Response) => {
 
     const { productId } = req.params;
-    console.log("product id",productId);
+    // console.log("product id",productId);
     
     const updatedProduct = await updateProductService(
       productId,

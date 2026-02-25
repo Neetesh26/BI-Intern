@@ -11,7 +11,7 @@ const router = express.Router()
 // })
 
 router.post(getEnv("ADMIN_LOGIN"),adminLogin)
-router.post(getEnv("CREATE_PRODUCT_API"),upload.array("images"),addProductController)
+router.post(getEnv("CREATE_PRODUCT_API"),upload.array("images",3),addProductController)
 router.put(getEnv("UPDATE_PRODUCT_API"), updateProductController)
 
 

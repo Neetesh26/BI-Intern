@@ -16,7 +16,11 @@ export const createApp = () => {
   app.use(requestLoggerGlobal)
   swaggerSetup(app);
 
-  app.use(cors()); 
+  app.use(cors({
+    origin: '*', 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+    allowedHeaders: ['Content-Type', 'Authorization'], 
+  })); 
   app.use('/api/v1/health',healthRouter)
 
   app.use('/api/v1/auth', authRouter)

@@ -23,7 +23,7 @@ const productSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ["MENS", "WOMENS", "KIDS"],
+      enum: ["MENS", "WOMENS", "KIDS", "SHOES"],
       default: "KIDS",
     },
     sizes: [
@@ -35,13 +35,13 @@ const productSchema = new mongoose.Schema(
     colors: [
       {
         type: String,
-        required: true,
+        // required: true,
       },
     ],
     images: [
       {
         type: String,
-        required: true,
+        // required: true,
       },
     ],
     user_id: {
