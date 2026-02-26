@@ -2,11 +2,10 @@ import { getEnv } from "../config/env";
 import { stripe } from "../config/stripeInstance";
 import { HttpMessage } from "../constants";
 import { findByCondition, updateById } from "../repository/users.repository";
-import Stripe from "stripe";
+// import Stripe from "stripe";
 
-/**
- * Helper to calculate total amount (in smallest currency unit) from product list.
- */
+
+
 const computeAmount = (product: any[]) => {
   return product.reduce((sum, item) => {
     const price = Number(item.price);
@@ -17,22 +16,18 @@ const computeAmount = (product: any[]) => {
   }, 0);
 };
 
-/**
- * Resolve Stripe Customer
- */
+
 const resolveStripeCustomer = async (
   userData?: any
 ): Promise<string | undefined> => {
   if (!userData || !userData._id) {
     return undefined;
   }
-  // console.log("Resolving Stripe customer for user:", userData._id);
 
   const user = await findByCondition({ _id: userData._id });
   if (!user) {
     return undefined;
   }
-  // console.log("user in  db",user);
   
   if (user.stripeCustomerId) {
     return user.stripeCustomerId;
@@ -42,18 +37,14 @@ const resolveStripeCustomer = async (
     phone: user.phone || undefined,
     metadata: { userId: userData._id.toString() },
   });
-  // console.log("Created new Stripe customer:", customer);
-  // console.log("Created new Stripe customer:", customer.id);
 
-  // Save Stripe customer ID to database (first time and repeat payments)
+
   await updateById(userData._id, { stripeCustomerId: customer.id });
 
   return customer.id;
 };
 
-/**
- * Create Checkout Session
- */
+
 export const createCheckoutSession = async (
   product: any[],
   userData?: any
@@ -85,7 +76,7 @@ export const createCheckoutSession = async (
     payment_method_types: ["card"],
     mode: "payment",
     line_items,
-    customer: customerId ?? undefined, // SAFE FIX
+    customer: customerId ?? undefined, 
     success_url: getEnv("Payment_Success_URL"),
     cancel_url: getEnv("Payment_Cancel_URL"),
   });
@@ -93,9 +84,7 @@ export const createCheckoutSession = async (
   return session;
 };
 
-/**
- * Create Payment Intent
- */
+
 export const createPaymentIntent = async (
   product: any[],
   userData: any,
@@ -110,7 +99,7 @@ export const createPaymentIntent = async (
   const amount = computeAmount(product);
   const customerId = await resolveStripeCustomer(userData);
 
-  // 🔥 IMPORTANT FIX
+  
   if (!customerId) {
     throw new Error("Stripe customer not found or could not be created");
   }
@@ -119,7 +108,6 @@ export const createPaymentIntent = async (
     return { customerId };
   }
 
-  // Attach payment method
   try {
     await stripe.paymentMethods.attach(paymentMethodId, {
       customer: customerId,
@@ -130,12 +118,10 @@ export const createPaymentIntent = async (
     }
   }
 
-  // Set default payment method
   await stripe.customers.update(customerId, {
     invoice_settings: { default_payment_method: paymentMethodId },
   });
 
-  // Persist payment method
   if (userData?._id) {
     await updateById(userData._id, {
       stripePaymentMethodId: paymentMethodId,
@@ -157,46 +143,44 @@ export const createPaymentIntent = async (
   return { intent, customerId };
 };
 
-/**
- * Stripe Webhook Handler
- */
-export const handleStripeWebhook = async (
-  signature: string,
-  rawBody: Buffer
-) => {
-  const webhookSecret = getEnv("STRIPE_WEBHOOK_SECRET");
-  let event: Stripe.Event;
 
-  try {
-    event = stripe.webhooks.constructEvent(
-      rawBody,
-      signature,
-      webhookSecret
-    );
-  } catch (err: any) {
-    throw new Error(`Webhook signature verification failed: ${err.message}`);
-  }
+// export const handleStripeWebhook = async (
+//   signature: string,
+//   rawBody: Buffer
+// ) => {
+//   const webhookSecret = getEnv("STRIPE_WEBHOOK_SECRET");
+//   let event: Stripe.Event;
 
-  switch (event.type) {
-    case "payment_intent.succeeded": {
-      const intent = event.data.object as Stripe.PaymentIntent;
-      // console.log("PaymentIntent succeeded:", {
-        paymentIntentId: intent.id,
-        status: intent.status,
-        userId: intent.metadata?.userId || null,
-      });
-      break;
-    }
+//   try {
+//     event = stripe.webhooks.constructEvent(
+//       rawBody,
+//       signature,
+//       webhookSecret
+//     );
+//   } catch (err: any) {
+//     throw new Error(`Webhook signature verification failed: ${err.message}`);
+//   }
 
-    case "checkout.session.completed": {
-      const session = event.data.object as Stripe.Checkout.Session;
-      // console.log("Checkout session completed:", session.id);
-      break;
-    }
+//   switch (event.type) {
+//     case "payment_intent.succeeded": {
+//       // const intent = event.data.object as Stripe.PaymentIntent;
+//       //  console.log("PaymentIntent succeeded:", {
+//       //   paymentIntentId: intent.id,
+//       //   status: intent.status,
+//       //   userId: intent.metadata?.userId || null,
+//       // });
+//       break;
+//     }
 
-    default:
-      // console.log(`Unhandled Stripe event type ${event.type}`);
-  }
+//     case "checkout.session.completed": {
+//       // const session = event.data.object as Stripe.Checkout.Session;
+//       // console.log("Checkout session completed:", session.id);
+//       break;
+//     }
 
-  return event;
-};
+//     default:
+//       // console.log(`Unhandled Stripe event type ${event.type}`);
+//   }
+
+//   return event;
+// };
