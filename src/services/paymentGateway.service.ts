@@ -1,4 +1,4 @@
-import { getEnv } from "../config/env";
+// import { getEnv } from "../config/env";
 import { stripe } from "../config/stripeInstance";
 import { HttpMessage } from "../constants";
 import { findByCondition, updateById } from "../repository/users.repository";
@@ -44,44 +44,44 @@ const resolveStripeCustomer = async (
 };
 
 
-export const createCheckoutSession = async (
-  product: any[],
-  userData?: any
-) => {
-  if (!product || !Array.isArray(product) || product.length === 0) {
-    throw new Error(HttpMessage.NOT_FOUND);
-  }
+// export const createCheckoutSession = async (
+//   product: any[],
+//   userData?: any
+// ) => {
+//   if (!product || !Array.isArray(product) || product.length === 0) {
+//     throw new Error(HttpMessage.NOT_FOUND);
+//   }
 
-  const line_items = product.map((item) => {
-    const price = Number(item.price);
-    if (isNaN(price)) {
-      throw new Error(`Invalid price for ${item.name}`);
-    }
+//   const line_items = product.map((item) => {
+//     const price = Number(item.price);
+//     if (isNaN(price)) {
+//       throw new Error(`Invalid price for ${item.name}`);
+//     }
 
-    return {
-      price_data: {
-        currency: "inr",
-        product_data: { name: item.name },
-        unit_amount: Math.round(price * 100),
-      },
-      quantity: 1,
-    };
-  });
+//     return {
+//       price_data: {
+//         currency: "inr",
+//         product_data: { name: item.name },
+//         unit_amount: Math.round(price * 100),
+//       },
+//       quantity: 1,
+//     };
+//   });
 
-  const customerId = await resolveStripeCustomer(userData);
-  // console.log("customer id",customerId);
+//   const customerId = await resolveStripeCustomer(userData);
+//   // console.log("customer id",customerId);
   
-  const session = await stripe.checkout.sessions.create({
-    payment_method_types: ["card"],
-    mode: "payment",
-    line_items,
-    customer: customerId ?? undefined, 
-    success_url: getEnv("Payment_Success_URL"),
-    cancel_url: getEnv("Payment_Cancel_URL"),
-  });
+//   const session = await stripe.checkout.sessions.create({
+//     payment_method_types: ["card"],
+//     mode: "payment",
+//     line_items,
+//     customer: customerId ?? undefined, 
+//     success_url: getEnv("Payment_Success_URL"),
+//     cancel_url: getEnv("Payment_Cancel_URL"),
+//   });
 
-  return session;
-};
+//   return session;
+// };
 
 
 export const createPaymentIntent = async (
