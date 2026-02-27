@@ -29,7 +29,7 @@ export const addProductController = asyncWrapper(
         uploadToImageKit(file.buffer, file.originalname)
       )
     );
-    // console.log(" req body product--->",req.body);
+    console.log(" req body product--->",req.body);
     
     const product = await createProducts({
       productName: req.body.productName,
@@ -62,7 +62,7 @@ export const updateProductController = asyncWrapper(
   async (req: Request, res: Response) => {
 
     const { productId } = req.params;
-    // console.log("product id",productId);
+    console.log("product id",productId);
     
     const updatedProduct = await updateProductService(
       productId,

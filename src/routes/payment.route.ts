@@ -1,6 +1,6 @@
 import express from 'express';
 import {
-  createCheckoutSession,
+  // createCheckoutSession,
   createPaymentIntent,
   // stripeWebhook,
 } from '../controllers/payment.controller';
@@ -8,7 +8,7 @@ import {
 const router = express.Router();
 
 // legacy checkout session - still works, accepts optional `userData`.
-router.post('/create-checkout-session', createCheckoutSession);
+// router.post('/create-checkout-session', createCheckoutSession);
 
 // newer payment intent flow used by stripe.js on the frontend
 router.post('/create-payment-intent', createPaymentIntent);
