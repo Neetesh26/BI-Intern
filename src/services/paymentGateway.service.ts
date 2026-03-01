@@ -138,7 +138,8 @@ export const createPaymentIntent = async (
     },
     payment_method_types: ["card"],
   });
-
+  console.log(">>>>>>>intent",intent);
+  
   return { intent, customerId };
 };
 
