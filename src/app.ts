@@ -28,6 +28,7 @@ export const createApp = () => {
 
   app.use('/api/v1/auth', authRouter)
   app.use('/api/v1/admin', adminRouter);
+  app.use('/api/v1/products', require('./routes/products.routes').default);
   app.use("/api/payment", paymentRoute);
 
   return app;
