@@ -1,12 +1,11 @@
-import express  from 'express';
+import express from 'express';
 import authRouter from './routes/users.route';
 import healthRouter from './routes/health.route'
 import adminRouter from "./routes/admin.route";
-import {swaggerSetup}  from "./config/swagger";
+import { swaggerSetup } from "./config/swagger";
 import { requestLoggerGlobal } from './middleware/requestLogger';
 import paymentRoute from "./routes/payment.route";
 import cors from 'cors';
-import { tokenBucketLimiter } from './middleware/tokenBucketRatelimiter';
 
 export const createApp = () => {
   const app = express();
@@ -21,15 +20,14 @@ export const createApp = () => {
   swaggerSetup(app);
 
   app.use(cors({
-    origin: '*', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-    allowedHeaders: ['Content-Type', 'Authorization'], 
-  })); 
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }));
 
 
-  app.use(tokenBucketLimiter(10,1)); // 10 tokens max, refills at 1 token/sec 
-
-  app.use('/api/v1/health',healthRouter)
+  app.set("trust proxy", true);
+  app.use('/api/v1/health', healthRouter)
 
   app.use('/api/v1/auth', authRouter)
   app.use('/api/v1/admin', adminRouter);

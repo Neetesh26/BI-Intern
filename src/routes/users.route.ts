@@ -6,6 +6,7 @@ import {
   verifyOTPController, 
 } from "../controllers/usersAuth.controller";
 import { getEnv } from "../shared/utils";
+import { globalLimiter } from "../middleware/tokenBucketRatelimiter";
 
 const router = express.Router();
 
@@ -19,6 +20,6 @@ const router = express.Router();
 // router.post("/login", loginUserController);
 
 router.post(getEnv("SEND_OTP"), sendOTPController);
-router.post(getEnv("VERIFY_OTP"), verifyOTPController);
+router.post(getEnv("VERIFY_OTP"),globalLimiter, verifyOTPController);
 
 export default router;
