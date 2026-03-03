@@ -26,7 +26,7 @@ export const createApp = () => {
   }));
 
 
-  app.set("trust proxy", true);
+  // app.set("trust proxy", true);
   app.use('/api/v1/health', healthRouter)
 
   app.use('/api/v1/auth', authRouter)

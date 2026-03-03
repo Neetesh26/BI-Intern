@@ -23,7 +23,6 @@ const startServer = async (): Promise<void> => {
     app.listen(AppConfig.PORT, () => {
       console.log(`✅ Server is running on port ${AppConfig.PORT}`);
       console.log(`🔧 Environment: ${AppConfig.NODE_ENV}`);
-      console.log(`Redis is connected: ${cacheInstance.status === 'ready' ? 'Yes' : 'No'}`);
     });
   } catch (error) {
     console.error('Failed to start server:', error);

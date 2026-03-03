@@ -3,7 +3,7 @@ import swaggerUi from "swagger-ui-express"
 import swaggerDoc from "../docs/swagger.json"
 
 export const swaggerSetup = (app: any) => {
-  console.log("Swagger setup loaded");
+  // console.log("Swagger setup loaded");
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDoc));
 };
 // export const swaggerSetup = (app: any) => {
