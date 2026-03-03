@@ -8,12 +8,12 @@ const getAllProducts = async () => {
 
     const cachedProducts = await redis.get("products");
     if (cachedProducts) {
-        // console.log("fetching from cache");
+        console.log("fetching from cache");
         
         return JSON.parse(cachedProducts);
     }
     
-    // console.log("fetching from db");
+    console.log("fetching from db");
     const products = await findMany({});
 
     redis.set("products", JSON.stringify(products), "EX", 3600);
