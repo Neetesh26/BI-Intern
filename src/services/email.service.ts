@@ -1,17 +1,24 @@
 import nodemailer from "nodemailer";
 import { getEnv } from "../config/env";
-import dns from "dns";
-dns.setDefaultResultOrder("ipv4first");
+
+
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
-  secure: false,
+  secure: false, 
+  tls: {
+    rejectUnauthorized: false // Helps with Render's network
+  },
+  connectionTimeout: 10000,  // 10s timeout
+  greetingTimeout: 5000,
+  socketTimeout: 10000,
   auth: {
     user: getEnv("MAIL_USER"),
     pass: getEnv("MAIL_PASS"),
   },
 });
+
 
 
 const sendOTPEmail = async (email: string, otp: string) => {
