@@ -8,5 +8,5 @@ dist/
 .vscode/
 .idea/
 coverage/
-firebaseServiceKey.json
-src/firebaseServiceKey.json
+# firebaseServiceKey.json
+# src/firebaseServiceKey.json
