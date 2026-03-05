@@ -2,12 +2,15 @@ import nodemailer from "nodemailer";
 import { getEnv } from "../config/env";
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
   auth: {
     user: getEnv("MAIL_USER"),
     pass: getEnv("MAIL_PASS"),
   },
 });
+
 
 const sendOTPEmail = async (email: string, otp: string) => {
   const mailOptions = {
