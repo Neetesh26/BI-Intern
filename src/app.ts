@@ -9,6 +9,9 @@ import cors from 'cors';
 
 import passport from "./config/passport";
 import googleRouter from "./routes/users.route"; 
+import orderRoutes from "./routes/order.routes";
+
+
 export const createApp = () => {
   const app = express();
   // stripe requires the raw body for webhook signature verification; register
@@ -38,6 +41,7 @@ app.use("/api/v1/auth", googleRouter);
   app.use('/api/v1/admin', adminRouter);
   app.use('/api/v1/products', require('./routes/products.routes').default);
   app.use("/api/payment", paymentRoute);
+  app.use("/api/orders", orderRoutes);
 
   return app;
 };
