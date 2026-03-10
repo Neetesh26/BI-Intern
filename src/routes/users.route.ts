@@ -1,6 +1,7 @@
 import express from "express";
 import { 
   
+  findUserByEmailController,
   googleAuth,
   googleAuthCallback,
   sendOTPController, 
@@ -27,5 +28,7 @@ router.post(getEnv("VERIFY_OTP"),globalLimiter, verifyOTPController);
 
 router.get("/google", googleAuth);
 router.get("/google/callback", googleAuthCallback);
+
+router.get("/find-user", findUserByEmailController);
 
 export default router;

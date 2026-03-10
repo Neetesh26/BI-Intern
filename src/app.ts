@@ -33,11 +33,11 @@ export const createApp = () => {
 
 app.use(passport.initialize());
 // New Google OAuth routes
-app.use("/api/v1/auth", googleRouter);
-  // app.set("trust proxy", true);
-  app.use('/api/v1/health', healthRouter)
+// app.set("trust proxy", true);
+app.use('/api/v1/health', healthRouter)
 
-  app.use('/api/v1/auth', authRouter)
+app.use('/api/v1/auth', authRouter)
+app.use("/api/v1/auth", googleRouter);
   app.use('/api/v1/admin', adminRouter);
   app.use('/api/v1/products', require('./routes/products.routes').default);
   app.use("/api/payment", paymentRoute);

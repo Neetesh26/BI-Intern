@@ -5,7 +5,8 @@ import { sendOTPService, verifyOTPService } from "../services/auth.service";
 import { HttpStatus } from "../constants";
 import { generateToken } from "../shared/helper";
 import { getEnv } from "../config/env";
-  // import { generateToken } from "../shared/helper";
+import User from "../models/usersSchema";
+// import { generateToken } from "../shared/helper";
   // import { getEnv } from "../config/env";
 
   export const sendOTPController = asyncWrapper(
@@ -33,6 +34,46 @@ import { getEnv } from "../config/env";
     }
   );
 
+
+export const findUserByEmailController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    console.log("calling controller")
+    const { email } = req.query as { email?: string };
+
+    if (!email) {
+      res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
+      return;
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    console.error("findUserByEmail error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
 
 
 // Start Google OAuth
