@@ -88,12 +88,18 @@ import { getEnv } from "../config/env";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // required for port 465
+  port: 587,
+  secure: false,
   auth: {
     user: getEnv("MAIL_USER"),
-    pass: getEnv("MAIL_PASS"), // Google App Password
+    pass: getEnv("MAIL_PASS"),
   },
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 5000,
+  socketTimeout: 10000
 });
 
 // verify connection (helps debugging on deployment)
