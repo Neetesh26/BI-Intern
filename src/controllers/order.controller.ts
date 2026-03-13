@@ -6,8 +6,8 @@ import {
 
 export const createOrderController = async (req: Request, res: Response) => {
   try {
-    console.log(">>>>>>>>>>>cont",req.body);
-    console.log("order api hit");
+    // console.log(">>>>>>>>>>>cont",req.body);
+    // console.log("order api hit");
     
     const order = await createOrderService(req.body);
 

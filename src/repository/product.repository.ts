@@ -2,9 +2,19 @@
 import { ProductModel } from "../models/productSchema";
 
 
+
+// import { ProductModel } from "../models/productSchema";
+
 export const createProductDataInDB = async (data: any) => {
-  return await ProductModel.create(data);
+
+  const product = await ProductModel.create(data);
+
+  return product;
+
 };
+// export const createProductDataInDB = async (data: any) => {
+//   return await ProductModel.create(data);
+// };
 
 export const findByConditionProduct = async (obj: Record<string, string | number>) => {
 

@@ -32,6 +32,7 @@ export const sendOTPService = async (email: string) => {
   user.isverified = false;
 
   await user.save();
+  
 
   return { message: "OTP Sent Successfully", user };
 };

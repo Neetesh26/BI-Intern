@@ -40,7 +40,7 @@ export const findUserByEmailController = async (
   res: Response
 ): Promise<void> => {
   try {
-    console.log("calling controller")
+    // console.log("calling controller")
     const { email } = req.query as { email?: string };
 
     if (!email) {

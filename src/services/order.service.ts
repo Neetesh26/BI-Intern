@@ -1,6 +1,6 @@
 import Order from "../models/order.model";
 import User from "../models/usersSchema";
-import { sendOrderMail } from "../services/nodeMailer.service";
+import { sendOrderMail } from "./sendOrderMail.service";
 
 export const createOrderService = async (orderData: any) => {
 
